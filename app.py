@@ -11,54 +11,6 @@ from flask import send_from_directory
 
 app = Flask(__name__, static_url_path='/static')
 
-@app.route('/dashboard')
-def dashboardv1():
-    # Read the log file
-    log_info = read_last_24_hours('monitoring.log')
-    
-    csv_files = glob.glob('data/*_soil_data.csv')
-    ip_addresses = [os.path.basename(file).replace('_soil_data.csv', '') for file in csv_files]
-    
-    # For each IP address, get the latest image and some important data
-    cameras = []
-    for ip_address in ip_addresses:
-        # Get the latest image
-        camera_image_folder = f'images/{ip_address.replace(".", "_")}'
-        latest_image_file = latest_file_in_dir(camera_image_folder, 'static')
-
-        # Get some important data
-        # For now, let's just get the latest temperature, humidity, and light level
-        data = pd.read_csv(f'data/{ip_address}_soil_data.csv')
-        
-        
-        # Convert 'start_watering_time' and 'stop_watering_time' to numeric type
-        data['start_watering_time'] = pd.to_numeric(data['start_watering_time'], errors='coerce')
-        data['stop_watering_time'] = pd.to_numeric(data['stop_watering_time'], errors='coerce')
-
-        # Replace 0s with NaN
-        data.replace(0, np.nan, inplace=True)
-
-        # Find the last non-zero watering times
-        last_start_watering_time = data['start_watering_time'].dropna().tail(1).values[0] if not data['start_watering_time'].dropna().empty else 'None'
-        last_stop_watering_time = data['stop_watering_time'].dropna().tail(1).values[0] if not data['stop_watering_time'].dropna().empty else 'None'
-
-        cameras.append({
-            'ip_address': ip_address,
-            'latest_image': latest_image_file,
-            'data': data.iloc[-1],
-            'start_watering_time': last_start_watering_time,
-            'stop_watering_time': last_stop_watering_time
-        })
-
-    # Render the dashboard template
-    return render_template('dashboard.html', ip_addresses=ip_addresses, log_info=log_info, cameras=cameras)
-
-
-
-
-from datetime import datetime
-
-from datetime import datetime
 
 from datetime import datetime
 
@@ -81,14 +33,16 @@ def dashboard():
         # Find the last watering times
         last_start_watering_time = None
         last_stop_watering_time = None
-        for i in range(len(data) - 1, -1, -1):
-            row = data.iloc[i]
-            if last_start_watering_time is None and row['start_watering_time'] != '0':
-                last_start_watering_time = row['timestamp'].split()[1].split('.')[0]
-            if last_stop_watering_time is None and row['stop_watering_time'] != '0':
-                last_stop_watering_time = row['timestamp'].split()[1].split('.')[0]
-            if last_start_watering_time is not None and last_stop_watering_time is not None:
-                break
+        # Convert 'start_watering_time' and 'stop_watering_time' to datetime type
+        data['start_watering_time'] = pd.to_datetime(data['start_watering_time'], errors='coerce')
+        data['stop_watering_time'] = pd.to_datetime(data['stop_watering_time'], errors='coerce')
+
+        # Find the last non-null watering times and format them
+        last_start_watering_time = pd.to_datetime(data['start_watering_time'].dropna().tail(1).values[0]).strftime('%Y-%m-%d %H:%M:%S') if not data['start_watering_time'].dropna().empty else 'None'
+        last_stop_watering_time = pd.to_datetime(data['stop_watering_time'].dropna().tail(1).values[0]).strftime('%Y-%m-%d %H:%M:%S') if not data['stop_watering_time'].dropna().empty else 'None'
+
+
+
 
         cameras.append({
             'ip_address': ip_address,
