@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Garden Data</title>
+    <style>
+        /* Add some basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Camera: {{ip_address}}</h1>
+
+        <!-- Display the latest image -->
+        {% if latest_image %}
+        <img src="/static/{{latest_image}}" alt="Latest Camera Image">
+        {% else %}
+        <p>No latest image available</p>
+        {% endif %}
+
+        <!-- Display the graphs -->
+        {% for filename in filenames %}
+        <img src="/static/{{filename}}" alt="{{filename}}">
+        {% endfor %}
+        
+        <h2>Camera Log</h2>
+        <pre>{{ log_info }}</pre>
+        
+        <h2>General 24H Log</h2>
+        <pre>{{ gen_log }}</pre>
+        
+        
+    </div>
+</body>
+
+</html>

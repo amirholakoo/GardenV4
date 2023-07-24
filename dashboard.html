@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <!-- Include Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">Dashboard</h1>
+        <!-- Display a card for each camera -->
+        {% for camera in cameras %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title"><a href="{{ url_for('camera', ip_address=camera.ip_address) }}">{{ camera.ip_address }}</a></h5>
+                <img src="{{ url_for('static', filename=camera.latest_image) }}" class="card-img-top" alt="Latest Image">
+                <p class="card-text">
+                    <i class="fas fa-thermometer-half"></i> Temperature: {{ camera.data.temperature }}<br>
+                    <i class="fas fa-tint"></i> Humidity:                {{ camera.data.humidity }}<br>
+                    <i class="fas fa-lightbulb"></i> Light Level:        {{ camera.data.light_level }}<br>
+                    <i class="fas fa-cloud"></i> Pressure:               {{ camera.data.pressure }}<br>
+                    <i class="fas fa-tint"></i> Wet Pixels:              {{ camera.data.num_wet_pixels }}<br>
+                    <i class="fas fa-seedling"></i> Sprout Pixels:       {{ camera.data.num_sprout_pixels }}<br>
+                    <i class="fas fa-water"></i> Dry Pixels:             {{ camera.data.num_dry_pixels }}<br>
+                    <i class="fas fa-clock"></i> Last Watering Started:  {{ camera.start_watering_time }}<br>
+                    <i class="fas fa-clock"></i> Last Watering Ended:    {{ camera.stop_watering_time }}<br>
+
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <!-- Include Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Include our custom JavaScript -->
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>
