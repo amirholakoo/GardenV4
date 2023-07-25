@@ -1,80 +1,89 @@
-🌱 Garden Monitoring System 🌱
-==============================
+🌱 GardenV4: An Automated Garden Monitoring System 🌱
+=====================================================
 
-This repository contains the code for a smart garden monitoring system that uses an ESP32 CAM to keep an eye on your garden boxes. The system captures images of the garden boxes, processes these images to detect dry and wet soil and sprouts, and decides if the garden needs watering based on sensor data. All the data is logged to a CSV file and a beautiful dashboard is provided for visualizing the data.
+Welcome to GardenV4, a comprehensive solution for monitoring and maintaining your garden using ESP32 CAM, various sensors, and a Raspberry Pi. This system allows you to monitor your garden's conditions and automatically waters your plants when necessary.
 
-🚀 Getting Started 🚀
----------------------
+📚 Table of Contents
+--------------------
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+-   [Requirements]
+-   [Hardware Setup]
+-   [Software Setup]
+-   [Running the Application]
+-   [Troubleshooting]
+-   [Contributing]
 
-### 📋 Prerequisites 📋
+📦 Requirements
+---------------
 
-#### 🛠️ Hardware 🛠️
+-   Raspberry Pi 4
+-   ESP32 CAM
+-   Various sensors (temperature, humidity, pressure, light level)
+-   Python 3.7 or higher
+-   Python libraries: Flask, pandas, numpy, matplotlib, os, glob, shutil, datetime, requests, cv2, PIL, csv, logging
 
-The project requires the following hardware:
+🛠️ Hardware Setup
+------------------
 
--   ESP32 CAM: This is a small camera module with a built-in ESP32 chip that is used to capture images of the garden boxes.
--   Various sensors: The project uses sensors to measure temperature, humidity, pressure, and light level. You can use any sensors that are compatible with the ESP32, but the code is currently set up to work with the following sensors:
-    -   Temperature and humidity: DHT22
-    -   Pressure: BMP280
-    -   Light level: BH1750
--   Water pump: The project uses a water pump to water the garden. You can use any pump that can be controlled by the ESP32.
+1.  ESP32 CAM Setup: Connect your ESP32 CAM to your computer using a USB cable. Make sure the ESP32 CAM is connected to the same network as your Raspberry Pi.
 
-#### 💻 Software 💻
+2.  Sensors Setup: Connect your sensors (temperature, humidity, pressure, light level) to your ESP32 CAM. Make sure the sensors are placed in appropriate locations in your garden.
 
-The project requires Python 3 and several Python libraries. You can install Python 3 from the [official website](https://www.python.org/downloads/). Once Python is installed, you can install the required libraries using pip, Python's package installer. Open a terminal and run the following commands:
+💻 Software Setup
+-----------------
 
-`pip install flask`
+1.  Python Installation: If you haven't already, install Python on your Raspberry Pi. You can do this by opening the terminal and running the following command:
 
-`pip install pandas`
+`sudo apt-get install python3`
 
-`pip install numpy`
+1.  Python Libraries Installation: Install the required Python libraries using pip, Python's package installer. You can do this by running the following command in the terminal:
 
-`pip install matplotlib`
+`pip install flask pandas numpy matplotlib os glob shutil datetime requests opencv-python-headless pillow csv logging`
 
-`pip install opencv-python`
-
-`pip install Pillow`
-
-`pip install requests`
-
-### 📥 Installing 📥
-
-To install the project, you need to clone the repository to your local machine. You can do this using Git, a version control system. If you don't have Git installed, you can download it from the [official website](https://git-scm.com/downloads). Once Git is installed, open a terminal, navigate to the directory where you want to install the project, and run the following command:
+1.  Clone the Repository: Clone this repository to your Raspberry Pi. You can do this by opening the terminal, navigating to the directory where you want to clone the repository, and running the following command:
 
 `git clone https://github.com/amirholakoo/GardenV4.git`
 
-This will create a new directory named "GardenV4" containing the project files.
+1.  Data and Image Folders: Navigate to the cloned repository directory and create folders named `data` and `images`. The `data` folder will be used to store the CSV files with the sensor data, and the `images` folder will be used to store the images captured by the ESP32 CAM. You can do this by running the following commands in the terminal:
 
-### ⚙️ Configuring the Project ⚙️
+`cd GardenV4`
 
-Before you can run the project, you need to set up the ESP32 server and update the IP address and port in the "MonitoringV3_HeadLess.py" script to match your actual setup. The IP address and port are used to connect to the ESP32 server to capture images and sensor data. You need to replace the placeholders in the script with the actual IP address and port of your ESP32 server.
+`mkdir data`
 
-You also need to create a "data" directory in the project directory to store the CSV files, and an "images" directory to store the images captured by the ESP32 CAM. The "images" directory should have a subdirectory for each ESP32 CAM, named with the IP address of the ESP32 CAM with dots replaced by underscores.
+`mkdir images`
 
-In the "MonitoringV3_HeadLess.py" script, you may need to adjust the following variables based on your specific setup and preferences:
+1.  Image Cropping: The system processes the images captured by the ESP32 CAM to detect dry and wet soil, and sprouts. You may need to adjust the cropping parameters in the `MonitoringV3_HeadLess.py` script to match your garden setup. Open the `MonitoringV3_HeadLess.py` file in a text editor, find the lines of code that perform the cropping, and adjust the parameters as needed.
 
--   `min_light`: This is the minimum light level required for the system to water the garden. If the light level is below this value, the system will not water the garden, regardless of the soil condition. This is to prevent watering during the night or when it's too cloudy.
--   `min_dry_pixels`: This is the minimum number of dry pixels required for the system to start watering. If the number of dry pixels in the image is below this value, the system will not water the garden, even if the light level is above `min_light`.
--   `min_wet_pixels`: This is the minimum number of wet pixels required for the system to stop watering. If the number of wet pixels in the image is below this value, the system will continue watering, even if the number of dry pixels is below `min_dry_pixels`.
+🚀 Running the Application
+--------------------------
 
-### 🏃 Running the Project 🏃
+1.  Update ESP32 Server Address: Open the `MonitoringV3_HeadLess.py` script in a text editor, find the line of code that specifies the IP address and port of the ESP32 server, and replace it with the actual IP address and port of your ESP32 CAM.
 
-Once everything is set up, you can run the project by navigating to the project directory in the terminal and running the following command:
+2.  Run the Monitoring Script: Open the terminal, navigate to the directory containing the `MonitoringV3_HeadLess.py` script, and run the following command:
+
 
 `python3 MonitoringV3_HeadLess.py`
 
-This will start the garden monitoring system and the dashboard server. You can view the dashboard by opening a web browser and navigating to "<http://localhost:5000/dashboard>".
+1.  Run the Flask Application: In the same terminal window, run the following command:
 
-🛠️ Built With 🛠️
-------------------
+`python3 app.py`
 
--   [Python](https://www.python.org/) - The programming language used
--   [Flask](https://flask.palletsprojects.com/) - The web framework used
--   [OpenCV](https://opencv.org/) - Used for image processing
--   [Pandas](https://pandas.pydata.org/) - Used for data manipulation and analysis
--   [Matplotlib](https://matplotlib.org/) - Used for data visualization
+1.  View the Dashboard: Open a web browser and navigate to `http://<your-raspberry-pi-ip-address>:5000` to view the dashboard.
+
+🛠️ Troubleshooting
+-------------------
+
+If you encounter any issues while setting up or running the application, please check the following:
+
+-   Make sure your ESP32 CAM and Raspberry Pi are connected to the same network.
+-   Make sure your ESP32 CAM and sensors are properly connected and functioning.
+-   Make sure you've installed Python and all the required Python libraries on your Raspberry Pi.
+-   Make sure you've correctly updated the IP address and port of the ESP32 server in the `MonitoringV3_HeadLess.py` script.
+
+🤝 Contributing
+---------------
+
+Contributions are welcome! Please feel free to submit a pull request.
 
 👥 Authors 👥
 -------------
