@@ -1,5 +1,3 @@
-# GardenV4
-
 Garden Monitoring System
 ========================
 
