@@ -7,6 +7,9 @@ import glob
 from shutil import copyfile
 from datetime import datetime, timedelta
 from flask import send_from_directory
+import plotly.graph_objects as go
+import matplotlib.dates as mdates
+import seaborn as sns
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -29,6 +32,46 @@ def dashboard():
 
         # Get all data
         data = pd.read_csv(f'data/{ip_address}_soil_data.csv')
+        
+        # Generate histograms and box plots for each variable
+        variables = ['num_dry_pixels', 'num_wet_pixels', 'num_sprout_pixels', 'temperature', 'humidity', 'pressure', 'light_level']
+        for variable in variables:
+            # Generate histogram
+            plt.figure()
+            sns.histplot(data[variable])
+            plt.title(f'Histogram of {variable}')
+            plt.savefig(f'static/{ip_address}_{variable}_hist.png')
+
+            # Generate box plot
+            plt.figure()
+            sns.boxplot(x=data[variable])
+            plt.title(f'Box Plot of {variable}')
+            plt.savefig(f'static/{ip_address}_{variable}_box.png')
+
+        
+
+        # Convert the 'timestamp' column to datetime type
+        data['timestamp'] = pd.to_datetime(data['timestamp'])
+
+        # Create a new column for the hour of the day
+        data['hour'] = data['timestamp'].dt.hour
+
+        # Create a new column for the day of the week
+        data['day'] = data['timestamp'].dt.day_name()
+
+        # Calculate the average temperature for each hour of each day
+        heatmap_data = data.groupby(['day', 'hour'])['temperature'].mean().unstack()
+
+        # Create the heatmap
+        plt.figure(figsize=(10, 6))
+        sns.heatmap(heatmap_data, cmap='coolwarm')
+
+        # Save the heatmap as an image
+        plt.savefig('static/heatmap.png')
+
+        # Generate the scatter plot and save it as an image
+        generate_scatter_plot(data, 'scatter_plot.png')
+
 
         # Find the last watering times
         last_start_watering_time = None
@@ -99,6 +142,8 @@ def camera(ip_address):
     camera_image_folder = f'images/{ip_address.replace(".", "_")}'
     latest_image_file = latest_file_in_dir(camera_image_folder, 'static')
     
+    
+    
     # Read the log file
     log_filename = f'monitoring_{ip_address.replace(".", "_")}.log'
     log_info = read_last_8_hours(log_filename)
@@ -163,6 +208,33 @@ def generate_graph(data, column, title, filename):
     plt.grid(True)
     plt.savefig('static/' + filename)  # Save the graph as an image in the static folder
     return filename
+
+
+
+def generate_scatter_plot(data, filename):
+    # Create a scatter plot of temperature vs. humidity
+    plt.figure(figsize=(10, 6))
+    scatter = plt.scatter(data['temperature'], data['humidity'], c=data['light_level'], cmap='viridis')
+    
+    # Add a colorbar
+    plt.colorbar(scatter, label='Light Level')
+    
+    # Add labels and a title
+    plt.xlabel('Temperature')
+    plt.ylabel('Humidity')
+    plt.title('Temperature vs. Humidity (colored by Light Level)')
+    
+    # Save the plot as an image
+    plt.savefig('static/' + filename)
+
+
+def generate_graphV2(data, column, title, filename):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=data['timestamp'], y=data[column], mode='lines', name=column))
+    fig.update_layout(title=title, xaxis_title='Time', yaxis_title=column)
+    fig.write_image('static/' + filename)
+    return filename
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -20,6 +20,7 @@
             <div class="card-body">
                 <h5 class="card-title"><a href="{{ url_for('camera', ip_address=camera.ip_address) }}">{{ camera.ip_address }}</a></h5>
                 <img src="{{ url_for('static', filename=camera.latest_image) }}" class="card-img-top" alt="Latest Image">
+                
                 <p class="card-text">
                     <i class="fas fa-thermometer-half"></i> Temperature: {{ camera.data.temperature }}<br>
                     <i class="fas fa-tint"></i> Humidity:                {{ camera.data.humidity }}<br>
@@ -32,6 +33,21 @@
                     <i class="fas fa-clock"></i> Last Watering Ended:    {{ camera.stop_watering_time }}<br>
 
                 </p>
+                
+                <img src="{{ url_for('static', filename='scatter_plot.png') }}" alt="Scatter Plot">
+                <!-- img src="{{ url_for('static', filename='heatmap.png') }}" alt="Heatmap" -->
+
+                
+                <!-- Display the histograms and box plots 
+                <h3>Histograms</h3>
+                <img src="{{ url_for('static', filename=camera.ip_address + '_num_dry_pixels_hist.png') }}" alt="Histogram of Number of Dry Pixels">
+                <img src="{{ url_for('static', filename=camera.ip_address + '_num_wet_pixels_hist.png') }}" alt="Histogram of Number of Wet Pixels">
+                <!-- Add more img tags for the other variables 
+
+                <h3>Box Plots</h3>
+                <img src="{{ url_for('static', filename=camera.ip_address + '_num_dry_pixels_box.png') }}" alt="Box Plot of Number of Dry Pixels">
+                <img src="{{ url_for('static', filename=camera.ip_address + '_num_wet_pixels_box.png') }}" alt="Box Plot of Number of Wet Pixels">
+                 Add more img tags for the other variables -->
             </div>
         </div>
         {% endfor %}
