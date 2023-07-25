@@ -7,7 +7,6 @@ import glob
 from shutil import copyfile
 from datetime import datetime, timedelta
 from flask import send_from_directory
-import plotly.graph_objects as go
 import matplotlib.dates as mdates
 import seaborn as sns
 
