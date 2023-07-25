@@ -244,7 +244,7 @@ def main():
             logging.root.removeHandler(handler)
             
         # Set up logging for this IP address
-        logging.basicConfig(filename=f'monitoring_{ip_address.replace(".", "_")}.log', level=logging.INFO, format='%(asctime)s %(message)s')
+        logging.basicConfig(filename=f'monitoring_{ip_address.replace(".", "_")}.log', level=logging.INFO, format='%(asctime)s %(message)s', force=True)
 
         url = f"http://{ip_address}/capture"
         image_save_path = os.path.join(os.getcwd(), 'images', ip_address.replace('.', '_'))
