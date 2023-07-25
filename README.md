@@ -10,8 +10,6 @@ Table of Contents
 
 -   [Installation](https://chat.openai.com/c/92bacfaf-5b3f-45b6-b93c-33a469abb1e1#installation)
 -   [Setup](https://chat.openai.com/c/92bacfaf-5b3f-45b6-b93c-33a469abb1e1#setup)
--   [Usage](https://chat.openai.com/c/92bacfaf-5b3f-45b6-b93c-33a469abb1e1#usage)
--   [License](https://chat.openai.com/c/92bacfaf-5b3f-45b6-b93c-33a469abb1e1#license)
 
 Installation
 ------------
@@ -45,18 +43,35 @@ Setup
     -   `static`: This directory will store the images for the web dashboard.
 5.  Program the ESP32 CAM with the `ESP32_AI_MonitoringV208.ino` and `CameraWebServer.ino` scripts using the Arduino IDE.
 
-Usage
------
+Running the Project
+-------------------
 
-To run the system, navigate to the directory containing the repository and run the command `python3 MonitoringV3_HeadLess.py`.
+Before you can run the project, you need to set up the ESP32 server and update the IP address and port in the "MonitoringV3_HeadLess.py" script to match your actual setup.
 
-To view the dashboard, open a web browser and navigate to `http://<raspberry_pi_ip_address>:5000/dashboard`, replacing `<raspberry_pi_ip_address>` with the actual IP address of your Raspberry Pi.
+You also need to create a "data" directory in the project directory to store the CSV files, and an "images" directory to store the images captured by the ESP32 CAM. The "images" directory should have a subdirectory for each ESP32 CAM, named with the IP address of the ESP32 CAM with dots replaced by underscores.
 
-License
+Once everything is set up, you can run the project by navigating to the project directory in the terminal and running the following command:
+
+`python3 MonitoringV3_HeadLess.py`
+
+This will start the garden monitoring system and the dashboard server. You can view the dashboard by opening a web browser and navigating to "<http://localhost:5000/dashboard>".
+
+Built With
+----------
+
+-   [Python](https://www.python.org/) - The programming language used
+-   [Flask](https://flask.palletsprojects.com/) - The web framework used
+-   [OpenCV](https://opencv.org/) - Used for image processing
+-   [Pandas](https://pandas.pydata.org/) - Used for data manipulation and analysis
+-   [Matplotlib](https://matplotlib.org/) - Used for data visualization
+
+Authors
 -------
 
-This project is licensed under the MIT License - see the [LICENSE](https://chat.openai.com/c/LICENSE) file for details.
+-   Amirholakoo - *Initial work*
 
+Acknowledgments
+---------------
+
+-   Thanks to OpenAI's ChatGPT for assistance with coding and troubleshooting.
 * * * * *
-
-Please replace `<raspberry_pi_ip_address>` with the actual IP address of your Raspberry Pi. You can find the IP address by running the command `hostname -I` on your Raspberry Pi.
