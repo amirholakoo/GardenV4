@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Graphs</title>
+</head>
+<body>
+    <h1>{{ ip_address }}</h1>
+    
+    <!-- Inside the body of the graphs.html template -->
+    <h3>Heatmap of Correlations</h3>
+    <img src="{{ url_for('static', filename=ip_address + '_correlations_heatmap.png') }}" alt="Heatmap of Correlations">
+    <h3>Heatmap of Day Hour Temp</h3>
+    <img src="{{ url_for('static', filename=ip_address + '_day_hour_temp_heatmap.png') }}" alt="Heatmap of Correlations">
+    <h3>Scatter Plot Humidity and Pressure vs. Temp</h3>
+    <img src="{{ url_for('static', filename='scatter_plot.png') }}" alt="Scatter Plot">
+
+    <!-- Display the histograms and box plots -->
+    <h3>Histograms</h3>
+    {% for variable in variables %}
+        <img src="{{ url_for('static', filename=ip_address + '_' + variable + '_hist.png') }}" alt="Histogram of {{ variable }}">
+    {% endfor %}
+
+    <h3>Box Plots</h3>
+    {% for variable in variables %}
+        <img src="{{ url_for('static', filename=ip_address + '_' + variable + '_box.png') }}" alt="Box Plot of {{ variable }}">
+    {% endfor %}
+</body>
+</html>

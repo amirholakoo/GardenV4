@@ -38,6 +38,11 @@
         <img src="/static/{{filename}}" alt="{{filename}}">
         {% endfor %}
         
+        <h2>Histogram and Box Plot</h2>
+        <!-- Inside the camera.html template -->
+        <a href="{{ url_for('camera_graphs', ip_address=ip_address) }}">View Graphs</a>
+
+        
         <h2>Camera Log</h2>
         <pre>{{ log_info }}</pre>
         
