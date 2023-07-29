@@ -7,6 +7,7 @@ import glob
 from shutil import copyfile
 from datetime import datetime, timedelta
 from flask import send_from_directory
+import plotly.graph_objects as go
 import matplotlib.dates as mdates
 import seaborn as sns
 
@@ -140,9 +141,7 @@ def camera(ip_address):
     # Get latest image 
     camera_image_folder = f'images/{ip_address.replace(".", "_")}'
     latest_image_file = latest_file_in_dir(camera_image_folder, 'static')
-    
-    
-    
+
     # Read the log file
     log_filename = f'monitoring_{ip_address.replace(".", "_")}.log'
     log_info = read_last_8_hours(log_filename)
@@ -150,13 +149,75 @@ def camera(ip_address):
     gen_filename = ('monitoring.log')
     gen_log = read_last_24_hours(gen_filename)
     
-
-
-
     # Render the camera page
     
     #return render_template('camera.html', ip_address=ip_address, data=data)
     return render_template('camera.html', filenames=filenames, ip_address=ip_address, latest_image=latest_image_file, log_info=log_info, gen_log=gen_log)
+
+@app.route('/camera/<ip_address>/graphs')
+def camera_graphs(ip_address):
+    
+    # Loading the data
+    data = pd.read_csv(f'data/{ip_address}_soil_data.csv')
+    
+###########################
+    # Convert watering times to datetime and calculate watering duration
+    data['start_watering_time'] = pd.to_datetime(data['start_watering_time'], errors='coerce')
+    data['stop_watering_time'] = pd.to_datetime(data['stop_watering_time'], errors='coerce')
+    data['watering_duration'] = (data['stop_watering_time'] - data['start_watering_time']).dt.total_seconds() / 60  # in minutes
+
+    # Generate histograms and box plots for each variable
+    variables = ['num_dry_pixels', 'num_wet_pixels', 'num_sprout_pixels', 'temperature', 'humidity', 'pressure', 'light_level', 'watering_duration']
+    for variable in variables:
+        # Generate histogram
+        plt.figure()
+        sns.histplot(data[variable])
+        plt.title(f'Histogram of {variable}')
+        plt.savefig(f'static/{ip_address}_{variable}_hist.png')
+###########################
+        # Generate box plot
+        plt.figure()
+        sns.boxplot(x=data[variable])
+        plt.title(f'Box Plot of {variable}')
+        plt.savefig(f'static/{ip_address}_{variable}_box.png')
+
+        # Generate box plot of watering duration by time of day
+        data['time_of_day'] = pd.cut(data['start_watering_time'].dt.hour, bins=[0, 6, 12, 18, 24], labels=['Night', 'Morning', 'Afternoon', 'Evening'], include_lowest=True)
+        plt.figure()
+        sns.boxplot(x='time_of_day', y='watering_duration', data=data)
+        plt.title('Box Plot of Watering Duration by Time of Day')
+        plt.savefig(f'static/{ip_address}_watering_duration_by_time_of_day_box.png')
+###########################
+        heatmap_variables = ['temperature', 'humidity', 'pressure', 'light_level']
+        # Generate heatmap of correlations
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(data[heatmap_variables].corr(), annot=True, cmap='coolwarm')
+        plt.title('Heatmap of Correlations')
+        plt.savefig(f'static/{ip_address}_correlations_heatmap.png')
+###########################
+        # Convert the 'timestamp' column to datetime type
+        data['timestamp'] = pd.to_datetime(data['timestamp'])
+        # Create a new column for the hour of the day
+        data['hour'] = data['timestamp'].dt.hour
+        # Create a new column for the day of the week
+        data['day'] = data['timestamp'].dt.day_name()
+        # Calculate the average temperature for each hour of each day
+        heatmap_data = data.groupby(['day', 'hour'])['temperature'].mean().unstack()
+
+        # Create the heatmap
+        plt.figure(figsize=(10, 6))
+        sns.heatmap(heatmap_data, cmap='coolwarm')
+        # Save the heatmap as an image
+        plt.savefig(f'static/{ip_address}_day_hour_temp_heatmap.png')
+###########################        
+        # Generate the scatter plot and save it as an image
+        generate_scatter_plot2(data, f'{ip_address}_scatter_HumPreVStemp.png')
+
+###########################
+
+    # Render the graphs page
+    return render_template('graphs.html', ip_address=ip_address, variables=variables)
+
 
 def latest_file_in_dir(dir, static_dir):
     files = glob.glob(dir + '/*')
@@ -208,6 +269,21 @@ def generate_graph(data, column, title, filename):
     plt.savefig('static/' + filename)  # Save the graph as an image in the static folder
     return filename
 
+def generate_scatter_plot2(data, filename):
+    # Create a scatter plot of temperature vs. humidity
+    plt.figure(figsize=(10, 6))
+    scatter = plt.scatter(data['humidity'], data['pressure'], c=data['temperature'], cmap='viridis')
+    
+    # Add a colorbar
+    plt.colorbar(scatter, label='Temperature')
+    
+    # Add labels and a title
+    plt.xlabel('Humidity')
+    plt.ylabel('Pressure')
+    plt.title('Humidity vs. Pressure (colored by Temperature)')
+    
+    # Save the plot as an image
+    plt.savefig('static/' + filename)
 
 
 def generate_scatter_plot(data, filename):
