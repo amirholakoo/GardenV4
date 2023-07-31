@@ -1,4 +1,6 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
+from flask import redirect, url_for
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,12 +12,14 @@ from flask import send_from_directory
 import plotly.graph_objects as go
 import matplotlib.dates as mdates
 import seaborn as sns
-
+import requests
+import logging
 
 app = Flask(__name__, static_url_path='/static')
 
+ESP_IP = "192.168.1.200"  # IP address of the ESP32 server
+ESP_PORT = 80  # Port of the ESP32 server
 
-from datetime import datetime
 
 @app.route('/dashboard')
 def dashboard():
@@ -84,9 +88,6 @@ def dashboard():
         last_start_watering_time = pd.to_datetime(data['start_watering_time'].dropna().tail(1).values[0]).strftime('%Y-%m-%d %H:%M:%S') if not data['start_watering_time'].dropna().empty else 'None'
         last_stop_watering_time = pd.to_datetime(data['stop_watering_time'].dropna().tail(1).values[0]).strftime('%Y-%m-%d %H:%M:%S') if not data['stop_watering_time'].dropna().empty else 'None'
 
-
-
-
         cameras.append({
             'ip_address': ip_address,
             'latest_image': latest_image_file,
@@ -102,23 +103,6 @@ def dashboard():
 @app.route('/data/<path:filename>')
 def serve_data(filename):
     return send_from_directory('data', filename)
-
-
-
-@app.route('/')
-def index():
-    
-    # Read the log file
-    log_info = read_last_24_hours('monitoring.log')
-        
-    # Find all CSV files in the data directory
-    csv_files = glob.glob('data/*_soil_data.csv')
-
-    # Extract the IP addresses from the file names
-    ip_addresses = [os.path.basename(file).replace('_soil_data.csv', '') for file in csv_files]
-
-    # Render the index page
-    return render_template('index.html', ip_addresses=ip_addresses, log_info=log_info)
 
 
 @app.route('/camera/<ip_address>')
@@ -218,6 +202,17 @@ def camera_graphs(ip_address):
     # Render the graphs page
     return render_template('graphs.html', ip_address=ip_address, variables=variables)
 
+###################################################
+
+###################################################
+
+###################################################
+@app.route('/pump_control')
+def pump_control():
+    return render_template('pump_control.html')
+
+
+######################################################################################################
 
 def latest_file_in_dir(dir, static_dir):
     files = glob.glob(dir + '/*')
@@ -237,6 +232,8 @@ def latest_file_in_dir(dir, static_dir):
     else:
         return None
     
+###################################################   
+
 def read_last_24_hours(filename):
     with open(filename, 'r') as f:
         lines = f.readlines()
@@ -248,6 +245,8 @@ def read_last_24_hours(filename):
     lines_last_24_hours = [line for line in lines if now - datetime.strptime(line.split()[0] + ' ' + line.split()[1], '%Y-%m-%d %H:%M:%S,%f') <= timedelta(hours=24)]
 
     return ''.join(lines_last_24_hours)
+
+###################################################
 
 def read_last_8_hours(filename):
     with open(filename, 'r') as f:
@@ -261,6 +260,8 @@ def read_last_8_hours(filename):
 
     return ''.join(lines_last_8_hours)
 
+###################################################
+
 def generate_graph(data, column, title, filename):
     plt.figure()
     plt.plot(data['timestamp'], data[column])
@@ -268,6 +269,8 @@ def generate_graph(data, column, title, filename):
     plt.grid(True)
     plt.savefig('static/' + filename)  # Save the graph as an image in the static folder
     return filename
+
+###################################################
 
 def generate_scatter_plot2(data, filename):
     # Create a scatter plot of temperature vs. humidity
@@ -285,6 +288,7 @@ def generate_scatter_plot2(data, filename):
     # Save the plot as an image
     plt.savefig('static/' + filename)
 
+###################################################
 
 def generate_scatter_plot(data, filename):
     # Create a scatter plot of temperature vs. humidity
@@ -302,6 +306,7 @@ def generate_scatter_plot(data, filename):
     # Save the plot as an image
     plt.savefig('static/' + filename)
 
+###################################################
 
 def generate_graphV2(data, column, title, filename):
     fig = go.Figure()
@@ -310,6 +315,7 @@ def generate_graphV2(data, column, title, filename):
     fig.write_image('static/' + filename)
     return filename
 
+######################################################################################################
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
