@@ -3,6 +3,16 @@
 
 Welcome to GardenV4, a comprehensive solution for monitoring and maintaining your garden using ESP32 CAM, various sensors, and a Raspberry Pi. This system allows you to monitor your garden's conditions and automatically waters your plants when necessary.
 
+This project is a garden monitoring system that uses an ESP32 CAM to monitor your garden boxes. The system collects data such as temperature, humidity, pressure, light level, and soil moisture, and uses this data to automatically water the plants when needed. The data is stored in a CSV file and can be viewed on a dashboard.
+
+Features 
+--------
+
+  - Data Collection: The system collects various environmental data using the ESP32 CAM and sensors.
+  - Automatic Watering: The system automatically waters the plants when the soil is too dry.
+  - Dashboard: The system provides a dashboard where you can view the collected data and the status of the watering system.
+  - Manual Pump Control: The system allows you to manually control the pumps from the dashboard.
+
 📚 Table of Contents
 --------------------
 
@@ -69,6 +79,17 @@ Welcome to GardenV4, a comprehensive solution for monitoring and maintaining you
 `python3 app.py`
 
 1.  View the Dashboard: Open a web browser and navigate to `http://<your-raspberry-pi-ip-address>:5000` to view the dashboard.
+
+Manual Pump Control
+-------------------
+The manual pump control feature allows you to manually turn each pump on or off from the dashboard. This can be useful if you need to water the plants outside of the automatic watering schedule, or if you need to stop the watering for some reason.
+
+To use the manual pump control feature, follow these steps:
+
+- Go to the dashboard by opening a web browser and navigating to the IP address of your Raspberry Pi.
+- Click on the "Pump Control" link. This will take you to the pump control page.
+- On the pump control page, select the pump number and the state (on or off) from the dropdown menus.
+- Click the "Submit" button to send the command to the ESP32. The selected pump will turn on or off as commanded.
 
 🛠️ Troubleshooting
 -------------------
